@@ -91,11 +91,11 @@ WSGI_APPLICATION = 'EURIQA.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'euriqa_db',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': '127.0.0.1',
-        'PORT': '3307',
+        'NAME': 'euriqa-db',
+        'USER': 'euriqa@euriqa-db',
+        'PASSWORD': 'CITU_onlineadmissionsys',
+        'HOST': 'euriqa-db.mysql.database.azure.com',
+        'PORT': '3306',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
         }
