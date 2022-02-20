@@ -123,7 +123,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # CSRF Trusted Domain
-CSRF_TRUSTED_ORIGINS = ['https://euriqa.azurewebsites.net.com/']
+CSRF_TRUSTED_ORIGINS = ['https://euriqa.azurewebsites.net']
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
