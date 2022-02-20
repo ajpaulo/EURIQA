@@ -21,6 +21,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR,'static2/profilephotos')
 MEDIA_URL = '/profilephotos/' 
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'media/profilephotos')
 
+# For deployment
+STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+STATIC_ROOT = os.path.join(BASE_DIR,'staticfiles')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
@@ -29,7 +32,9 @@ MEDIA_URL = '/profilephotos/'
 SECRET_KEY = 'id^)e5ymfgw98@*^nasp8pp56(obqad0_6_mc6w&b)_ioipsoq'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
+DEBUG = False
+
 
 ALLOWED_HOSTS = ['*']
 
@@ -42,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
     'administrator',
     'enrollee',
@@ -49,6 +55,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
