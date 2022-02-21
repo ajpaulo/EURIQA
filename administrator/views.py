@@ -64,9 +64,6 @@ class AdminDashboard(View):
                 count_shs=Enrollee.objects.filter(level='shs').count()
                 count_jhs=Enrollee.objects.filter(level='jhs').count()
 
-                print(qs_enrollee)
-                print(qs_program)
-
                 context = {
                     'qs_admin': qs_admin,
                     'qs_enrollee' : qs_enrollee,
@@ -638,34 +635,29 @@ def view_exam(request, exam_id=None):
         is_admin = Administrator.objects.filter(user_id=request.user.id)
         if request.user.is_authenticated:
             if is_admin:
-                if Exam.objects.filter(exam_id__in=get_all):
-                    qs_admin = Administrator.objects.filter(user_id=request.user.id)
-                    qs_exam = Exam.objects.get(exam_id = exam_id)
-                    qs_questions = Question.objects.filter(exam = exam_id)
-                    qs_parts = Part.objects.filter(exam_id = exam_id) #Gets the parts of the latest exam added
-                    
-                    # get = qs_questions.values_list('part').distinct()
-                    # for parts in enumerate(get):
-                    #     print(parts)
+                # if Exam.objects.filter(exam_id__in=get_all):
+                qs_admin = Administrator.objects.filter(user_id=request.user.id)
+                qs_exam = Exam.objects.get(exam_id = exam_id)
+                qs_questions = Question.objects.filter(exam = exam_id)
+                qs_parts = Part.objects.filter(exam_id = exam_id) #Gets the parts of the latest exam added
+                
+                context ={
+                    'exams': qs_exam,
+                    'questions' : qs_questions,
+                    'parts': qs_parts,
+                    'admin_details': qs_admin,
+                }
+                return render(request, 'administrator/examManagement/adminEditExam.html', context)
 
-                    # print(parts[1])
-                else:
-                    messages.error(request,"User does not exist")
+                # else:
+                #     messages.error(request,"User does not exist")
 
-                    context ={
-                        'exams': qs_exam,
-                        'questions' : qs_questions,
-                        'parts': qs_parts,
-                        'admin_details': qs_admin,
-                    }
-                    
             else:
                 messages.error(request, "You are unauthorized to access this link.")
                 return redirect("administrator:admin_login")
         else:
             messages.error(request, "You are not logged in.")
             return redirect("administrator:admin_login")
-        return render(request, 'administrator/examManagement/adminEditExam.html', context)
     
     else:
         if 'btnAddQues' in request.POST:
@@ -679,7 +671,6 @@ def view_exam(request, exam_id=None):
             points = request.POST.get("add_points")
             answer = request.POST.get("add_option")
 
-            print(exam_id)
             get_exam_id = Exam.objects.get(exam_id = exam_id)
             get_part_id = Part.objects.get(part_id = part)
 
@@ -692,8 +683,6 @@ def view_exam(request, exam_id=None):
             # Update total exam items and overall points of Exam
             total_items = Question.objects.filter(exam = get_exam_id).count()
             total_points = Question.objects.filter(exam = get_exam_id).aggregate(Sum('points')).get('points__sum')
-            
-            print(total_items)
             
             update_total_items = Exam.objects.filter(exam_id = exam_id).update(total_items = total_items)
             update_total_points = Exam.objects.filter(exam_id = exam_id).update(overall_points = total_points)
