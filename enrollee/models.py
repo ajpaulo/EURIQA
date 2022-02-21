@@ -42,7 +42,7 @@ class ExamAnswers(models.Model):
     answer = models.CharField(default=None, null=True, max_length = 1)
     exam =  models.ForeignKey(Exam, on_delete=models.CASCADE)
     part =  models.ForeignKey(Part, on_delete=models.CASCADE)
-    question =  models.OneToOneField(Question, on_delete=models.CASCADE)
+    question =  models.ForeignKey(Question, on_delete=models.CASCADE)
     is_correct = models.BooleanField(default=None, null=True)
 
     class Meta:

@@ -32,8 +32,8 @@ STATIC_ROOT = os.path.join(BASE_DIR,'staticfiles')
 SECRET_KEY = 'id^)e5ymfgw98@*^nasp8pp56(obqad0_6_mc6w&b)_ioipsoq'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-# DEBUG = False
+# DEBUG = True
+DEBUG = False
 
 
 ALLOWED_HOSTS = ['*']
@@ -87,23 +87,37 @@ WSGI_APPLICATION = 'EURIQA.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'EURIQA_db',
-        'USER': 'euriqa@euriqa-db',
-        'PASSWORD': 'CITU_onlineadmissionsys',
-        'HOST': 'euriqa-db.mysql.database.azure.com',
-        'PORT': '3306',
-        'OPTIONS': {
-            'ssl': {'ca': 'staticfiles/ssl/BaltimoreCyberTrustRoot.crt.pem'},
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+if (DEBUG is True):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'euriqa_db',
+            'USER': 'root',
+            'PASSWORD': '',
+            'HOST': '127.0.0.1',
+            'PORT': '3307',
+            'OPTIONS': {
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+            }
         }
     }
-}
-
-
+    
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'EURIQA_db',
+            'USER': 'euriqa@euriqa-db',
+            'PASSWORD': 'CITU_onlineadmissionsys',
+            'HOST': 'euriqa-db.mysql.database.azure.com',
+            'PORT': '3306',
+            'OPTIONS': {
+                'ssl': {'ca': 'staticfiles/ssl/BaltimoreCyberTrustRoot.crt.pem'},
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+            }
+        }
+    }
+    
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
 

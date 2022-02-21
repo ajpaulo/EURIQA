@@ -138,7 +138,6 @@
 
               
 							<div class="carousel-inner">
-                {% for result in results %}
 								<div class="carousel-item active">
 									<img class="img-fluid d-block w-100" src="{% static 'assets/img/citstudents1.png' %}" alt="First slide">
 									
@@ -155,7 +154,6 @@
 									</div>
                   {% endif %}
 								</div>
-                {% endfor %}
 							</div>
             </div>
 				</div>
@@ -206,18 +204,15 @@
                                 <dd class="col-sm-3">{{item.1}}/{{item.0.overall_points}}</dd>
                               {% endfor %}
                                 <hr>
-                              {% for result in results %}
                                 {% for exam in exams %}
                                   <dt class="col-sm-9 ">Total Score</dt>
                                   <dd class="col-sm-3">{{result.total_score}}/{{exam.overall_points}}</dd>
                                 {% endfor %}
-                              {% endfor %}
                             </dl>
                         </div>  
                     </div>
                 </div>
                 <!-- Score Breakdown End -->
-
                 <div class="card">
                     
                   <div class="card-body">

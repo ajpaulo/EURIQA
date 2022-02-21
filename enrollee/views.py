@@ -287,29 +287,30 @@ def exam_page(request, exam_id=None, part_id=None):
                     # Store the correct answers in the list_correct_ans.
                     list_correct_ans.append(ques.answer)
 
-                    try: 
-                        # Loop over the list of ques_id to save each inputs from the enrollee to the database.
-                        # Since both lists of question id and answer will always have the same number of itemss,
-                        # we get the index from one of them to allow easy record saving.
-                        for i in range(len(list_ques_id)):
-                            save_items = ExamAnswers(enrollee = get_enrollee, exam = get_exam, part = get_part, is_correct=True, question = list_ques_id[i], answer = list_answers[i])
-                        save_items.save()
+                    # try: 
+                    # Loop over the list of ques_id to save each inputs from the enrollee to the database.
+                    # Since both lists of question id and answer will always have the same number of itemss,
+                    # we get the index from one of them to allow easy record saving.
+                    # new_results, save_results = ExamResults.objects.update_or_create(enrollee = get_enrollee, exam = get_exam, defaults = {'total_score': total_score})
+                    for i in range(len(list_ques_id)):
+                        save_items = ExamAnswers(enrollee = get_enrollee, exam = get_exam, part = get_part, is_correct=None, question = list_ques_id[i], answer = list_answers[i])
+                    save_items.save()
 
-                        if(list_correct_ans[i] == list_answers[i]):
-                            save_items = ExamAnswers.objects.filter(question_id = list_ques_id[i]).update(is_correct=True)
-                        else:
-                            save_items = ExamAnswers.objects.filter(question_id = list_ques_id[i]).update(is_correct=False)
+                    if(list_correct_ans[i] == list_answers[i]):
+                        save_items = ExamAnswers.objects.filter(enrollee_id = get_enrollee).filter(question_id = list_ques_id[i]).update(is_correct=True)
+                    else:
+                        save_items = ExamAnswers.objects.filter(enrollee_id = get_enrollee).filter(question_id = list_ques_id[i]).update(is_correct=False)
 
-                    # When IntegrityError occurs, just update the database with the same values.
-                    except:
-                        for i in range(len(list_ques_id)):
-                            if(list_correct_ans[i] == list_answers[i]):
-                                save_items = ExamAnswers.objects.filter(question_id = list_ques_id[i]).update(is_correct=True)
-                            else:
-                                save_items = ExamAnswers.objects.filter(question_id = list_ques_id[i]).update(is_correct=False)
+                    # # When IntegrityError occurs, just update the database with the same values.
+                    # except:
+                    #     for i in range(len(list_ques_id)):
+                    #         if(list_correct_ans[i] == list_answers[i]):
+                    #             save_items = ExamAnswers.objects.filter(question_id = list_ques_id[i]).update(is_correct=True)
+                    #         else:
+                    #             save_items = ExamAnswers.objects.filter(question_id = list_ques_id[i]).update(is_correct=False)
 
                 # Get the ques ids of correct answers
-                get_ques_id = ExamAnswers.objects.filter(exam_id = exam_id).filter(is_correct = True).values_list('question_id', flat=True)
+                get_ques_id = ExamAnswers.objects.filter(enrollee_id = get_enrollee).filter(exam_id = exam_id).filter(is_correct = True).values_list('question_id', flat=True)
                 
                 # Create a list where we can store all the points of the correct answers
                 points_list = []
@@ -354,7 +355,7 @@ def exam_results(request, enrollee_id=None, exam_id=None):
         if request.user.is_authenticated:
             if is_enrollee:
             
-                qs_results = ExamResults.objects.filter(exam_id = exam_id)
+                get_results = ExamResults.objects.filter(enrollee_id = enrollee_id)
                 qs_exams = Exam.objects.filter(exam_id= exam_id)
                 qs_parts = Part.objects.filter(exam = exam_id)
                 
@@ -378,21 +379,24 @@ def exam_results(request, enrollee_id=None, exam_id=None):
 
                 score_list = []
 
+
                 # loop through all question parts
                 for qs in qs_parts:
                     # Get question ids of all correct answers
-                    correct_ans_id = ExamAnswers.objects.filter(exam_id = exam_id).filter(part_id=qs.pk).filter(is_correct=True).values_list('question_id', flat=True)
-
+                    correct_ans_id = ExamAnswers.objects.filter(enrollee_id = enrollee_id).filter(exam_id = exam_id).filter(part_id=qs.pk).filter(is_correct=True).values_list('question_id', flat=True)
+                    print(correct_ans_id)
+        
                     # Get the total points per part
                     total_points_per_part = Question.objects.filter(question_id__in = correct_ans_id).aggregate(Sum('points')).get('points__sum')
 
                     score_list.append(total_points_per_part)
                 
+
                 # Zip the Part objects and the scores for easy displaying in templates
                 parts_and_score = zip(qs_parts, score_list)
                 
                 context={
-                    'results' : qs_results,
+                    'result' : get_results,
                     'exams': qs_exams,
                     'status': status,
                     'score_list': score_list,
