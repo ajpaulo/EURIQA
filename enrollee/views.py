@@ -7,6 +7,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from enrollee.models import *
 from administrator.models import *
+from django.db.models import Sum
 from django.core.files.storage import FileSystemStorage
 
 # Create your views here.
@@ -55,8 +56,6 @@ class EnrolleeDetailsCheckView(View):
         if request.user.is_authenticated:
             if is_enrollee:
                 qs_enrollee = Enrollee.objects.filter(user_id=request.user.id)
-
-                print(qs_enrollee)
 
                 context = {
                     'enrollees' : qs_enrollee,
@@ -227,7 +226,11 @@ def exam_page(request, exam_id=None, part_id=None):
                         }
 
                         return render(request, 'enrollee/enrolleeExam.html', context)
-                
+                    
+                    else:
+                        messages.error(request,"You are already done taking the exam. If you think this is a mistake, contact your enrollment officer.")
+                        return redirect("enrollee:enrollee_instructions")
+                    
                 else:
                     messages.error(request, "You are unauthorized to access this link.")
                     return redirect("enrollee:enrollee_login")
@@ -305,12 +308,23 @@ def exam_page(request, exam_id=None, part_id=None):
                             else:
                                 save_items = ExamAnswers.objects.filter(question_id = list_ques_id[i]).update(is_correct=False)
 
-                # Get the exam score by counting is_correct
-                get_answers = ExamAnswers.objects.filter(exam_id = exam_id)
-                get_exam_score = get_answers.filter(is_correct = True).count()
+                # Get the ques ids of correct answers
+                get_ques_id = ExamAnswers.objects.filter(exam_id = exam_id).filter(is_correct = True).values_list('question_id', flat=True)
+                
+                # Create a list where we can store all the points of the correct answers
+                points_list = []
 
+                # Loop through the question ids of all the correct answer 
+                for i in range(len(get_ques_id)):
+                    get_points = Question.objects.filter(question_id = get_ques_id[i]).aggregate(Sum('points')).get('points__sum')
+                    # Append all points of the correct answer into the list
+                    points_list.append(get_points)
+
+                # Get the sum of scores from the list
+                total_score = sum(points_list)
+                
                 # Save/Update Results of Exam for each Part
-                new_results, save_results = ExamResults.objects.update_or_create(enrollee = get_enrollee, exam = get_exam, defaults={'total_score': get_exam_score})
+                new_results, save_results = ExamResults.objects.update_or_create(enrollee = get_enrollee, exam = get_exam, defaults = {'total_score': total_score})
 
                 # Get all part IDs and save it in a list
                 get_all = Part.objects.filter(exam_id = exam_id).values_list('part_id', flat=True)
@@ -332,7 +346,7 @@ def exam_page(request, exam_id=None, part_id=None):
                     else:
                         # Update exam status of enrollee if final part is already answered
                         update_status = Enrollee.objects.filter(user = request.user.id).update(exam_status = "done")
-                        return redirect("enrollee:enrollee_examcompletion", enrollee_id=request.user.id, exam_id = exam_id)
+                        return redirect("enrollee:enrollee_examcompletion", enrollee_id=get_enrollee.pk, exam_id = exam_id)
 
 def exam_results(request, enrollee_id=None, exam_id=None):
     if request.method != 'POST':
@@ -349,7 +363,7 @@ def exam_results(request, enrollee_id=None, exam_id=None):
                 total_points = get_exam.overall_points
 
                 # Get the total_score value from ExamResults
-                get_results = ExamResults.objects.get(exam_id = exam_id)
+                get_results = ExamResults.objects.get(enrollee_id = enrollee_id)
                 score = get_results.total_score
                 
                 # Get the passing score (60% passing rate)
@@ -364,10 +378,15 @@ def exam_results(request, enrollee_id=None, exam_id=None):
 
                 score_list = []
 
+                # loop through all question parts
                 for qs in qs_parts:
-                    correct_answers_per_part = ExamAnswers.objects.filter(exam_id = exam_id).filter(part_id=qs.pk).filter(is_correct=True)
-                    score_per_part = correct_answers_per_part.count()
-                    score_list.append(score_per_part)
+                    # Get question ids of all correct answers
+                    correct_ans_id = ExamAnswers.objects.filter(exam_id = exam_id).filter(part_id=qs.pk).filter(is_correct=True).values_list('question_id', flat=True)
+
+                    # Get the total points per part
+                    total_points_per_part = Question.objects.filter(question_id__in = correct_ans_id).aggregate(Sum('points')).get('points__sum')
+
+                    score_list.append(total_points_per_part)
                 
                 # Zip the Part objects and the scores for easy displaying in templates
                 parts_and_score = zip(qs_parts, score_list)

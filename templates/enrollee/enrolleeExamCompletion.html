@@ -142,7 +142,7 @@
 								<div class="carousel-item active">
 									<img class="img-fluid d-block w-100" src="{% static 'assets/img/citstudents1.png' %}" alt="First slide">
 									
-                  {% if status is 'passed' %}
+                  {% if status == 'passed' %}
                   <div class="carousel-caption d-none d-md-block">
                     <h3 style="color: white; ">You Passed!</h3>
                     <h1 style="color: white; font-size: 120px;">{{result.total_score}}</h1>
