@@ -79,7 +79,7 @@ function loadLabeledImages() {
     labels.map(async label => {
       const descriptions = []
       for (let i = 1; i <= 1; i++) {
-        const img = await faceapi.fetchImage(`/static2/profilephotos/${label}.jpg`)
+        const img = await faceapi.fetchImage(`https://euriqastorage.blob.core.windows.net/referencephotos/${label}.jpg`)
         const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor()
         descriptions.push(detections.descriptor)
       }
