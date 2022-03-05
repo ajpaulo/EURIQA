@@ -9,7 +9,7 @@ class Administrator(models.Model):
     middle_name = models.CharField(max_length=50, null=True)
     address = models.CharField(max_length=50, blank=False)
     position = models.CharField(max_length=50, blank=False)
-    picture = models.ImageField(default='missing_profile.jpg', upload_to='profilephotos/')
+    picture = models.ImageField(default='https://euriqastorage.blob.core.windows.net/profilephotos/missing_profile.jpg')
     
     class Meta:
         db_table = 'administrator'

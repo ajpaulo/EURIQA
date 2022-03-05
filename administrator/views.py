@@ -9,8 +9,9 @@ from enrollee.models import *
 from django.db import connection
 from django.db.models import Sum
 from django.core.files.storage import FileSystemStorage
-# from .forms import EnrolleeRegistrationForm
-# from .forms import QuestionForm
+
+import os
+from azure.storage.blob import BlobServiceClient
 
 # Create your views here.
 
@@ -116,14 +117,14 @@ class AdmminProfile(View):
                 position = request.POST.get("update_position")
                 username = request.POST.get("update_username")
 
-                picture = request.FILES['picture']
-                fileSystemStorage = FileSystemStorage()
-                filename = fileSystemStorage.save(picture.name, picture)
-                picture = fileSystemStorage.url(filename)
+                # picture = request.FILES['picture']
+                # fileSystemStorage = FileSystemStorage()
+                # filename = fileSystemStorage.save(picture.name, picture)
+                # picture = fileSystemStorage.url(filename)
 
 
                 update_admin = Administrator.objects.filter(user_id = request.user.id).update(
-                    picture = picture,
+                    # picture = picture,
                     middle_name = middlename,
                     address = address,
                     position = position
@@ -133,6 +134,35 @@ class AdmminProfile(View):
                     first_name = firstname,
                     last_name = lastname,
                     username = username)
+
+            elif 'testBtn' in request.POST:
+                # Define connection string from azure
+                connect_str = "DefaultEndpointsProtocol=https;AccountName=euriqastorage;AccountKey=DDCCJ4FeaoYFzBDnrtKtf3dY8UFyvBURIT0hUatK6RKwyiRCIC7Q0erwh1llTz/fhWUHHcIISa8dpfIfWW9tbw==;EndpointSuffix=core.windows.net"
+
+                # container name in which images will be store in the storage account
+                container_name = "profilephotos" 
+
+                blob_service_client = BlobServiceClient.from_connection_string(conn_str=connect_str) # create a blob service client to interact with the storage account
+                try:
+                    container_client = blob_service_client.get_container_client(container=container_name) # get container client to interact with the container in which images will be stored
+                    container_client.get_container_properties() # get properties of the container to force exception to be thrown if container does not exist
+                except Exception as e:
+                    print(e)
+                    print("Creating container...")
+                    container_client = blob_service_client.create_container(container_name) # create a container in the storage account if it does not exist
+                
+                photo = request.FILES["photos"]
+                
+                try:
+                    container_client.upload_blob(photo.name, photo) # upload the photo to the container using the filename as the blob name                    
+                    blob_items = container_client.list_blobs()
+                    for blob in blob_items:
+                        get_blob=container_client.get_blob_client(blob=photo.name)
+                        update_prof_pic = Administrator.objects.filter(user_id = request.user.id).update(picture = get_blob.url)
+                
+                except Exception as e:
+                    print(e)
+                    print("Ignoring duplicate filenames") # ignore duplicate filenames
 
             return redirect("administrator:admin_profile")
         

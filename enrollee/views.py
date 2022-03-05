@@ -10,6 +10,8 @@ from administrator.models import *
 from django.db.models import Sum
 from django.core.files.storage import FileSystemStorage
 
+import os
+from azure.storage.blob import BlobServiceClient
 # Create your views here.
 
 class EnrolleeHomeView(View):
@@ -114,11 +116,38 @@ class EnrolleeCaptureImageView(View):
     def post(self, request):
         if request.method == 'POST':
             if 'btnNext' in request.POST:
-                picture = request.FILES['picture']
-                fileSystemStorage = FileSystemStorage()
-                filename = fileSystemStorage.save(picture.name, picture)
-                picture = fileSystemStorage.url(filename)
-                update_picture = Enrollee.objects.filter(user_id = request.user.id).update(pictures = picture)
+                # picture = request.FILES['picture']
+                # fileSystemStorage = FileSystemStorage()
+                # filename = fileSystemStorage.save(picture.name, picture)
+                # picture = fileSystemStorage.url(filename)
+                # update_picture = Enrollee.objects.filter(user_id = request.user.id).update(pictures = picture)
+                 # Define connection string from azure
+                connect_str = "DefaultEndpointsProtocol=https;AccountName=euriqastorage;AccountKey=DDCCJ4FeaoYFzBDnrtKtf3dY8UFyvBURIT0hUatK6RKwyiRCIC7Q0erwh1llTz/fhWUHHcIISa8dpfIfWW9tbw==;EndpointSuffix=core.windows.net"
+
+                # container name in which images will be store in the storage account
+                container_name = "referencephotos" 
+
+                blob_service_client = BlobServiceClient.from_connection_string(conn_str=connect_str) # create a blob service client to interact with the storage account
+                try:
+                    container_client = blob_service_client.get_container_client(container=container_name) # get container client to interact with the container in which images will be stored
+                    container_client.get_container_properties() # get properties of the container to force exception to be thrown if container does not exist
+                except Exception as e:
+                    print(e)
+                    print("Creating container...")
+                    container_client = blob_service_client.create_container(container_name) # create a container in the storage account if it does not exist
+                
+                picture = request.FILES["picture"]
+                
+                try:
+                    container_client.upload_blob(picture.name, picture) # upload the photo to the container using the filename as the blob name                    
+                    blob_items = container_client.list_blobs()
+                    for blob in blob_items:
+                        get_blob=container_client.get_blob_client(blob=picture.name)
+                        # update_prof_pic = Administrator.objects.filter(user_id = request.user.id).update(picture = get_blob.url)
+                
+                except Exception as e:
+                    print(e)
+                    print("Ignoring duplicate filenames") # ignore duplicate filenames
             return redirect("enrollee:enrollee_frtest")
 
 class EnrolleeFaceRecTest(View):
