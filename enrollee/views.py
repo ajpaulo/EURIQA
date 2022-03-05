@@ -11,7 +11,7 @@ from django.db.models import Sum
 from django.core.files.storage import FileSystemStorage
 
 import os
-from azure.storage.blob import BlobServiceClient
+from azure.storage.blob import BlobServiceClient, ContentSettings
 # Create your views here.
 
 class EnrolleeHomeView(View):
@@ -139,7 +139,8 @@ class EnrolleeCaptureImageView(View):
                 picture = request.FILES["picture"]
                 
                 try:
-                    container_client.upload_blob(picture.name, picture) # upload the photo to the container using the filename as the blob name                    
+                    set_content_type = ContentSettings(content_type='image/jpeg') # set content type to image
+                    container_client.upload_blob(picture.name, picture, content_settings = set_content_type) # upload the photo to the container using the filename as the blob name                    
                     blob_items = container_client.list_blobs()
                     for blob in blob_items:
                         get_blob=container_client.get_blob_client(blob=picture.name)
