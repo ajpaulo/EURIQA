@@ -418,9 +418,13 @@ def exam_results(request, enrollee_id=None, exam_id=None):
         
                     # Get the total points per part
                     total_points_per_part = Question.objects.filter(question_id__in = correct_ans_id).aggregate(Sum('points')).get('points__sum')
+                    
+                    if total_points_per_part is not None:
+                        score_list.append(total_points_per_part)
 
-                    score_list.append(total_points_per_part)
-                
+                    else:
+                        total_points_per_part = 0
+                        score_list.append(total_points_per_part)
 
                 # Zip the Part objects and the scores for easy displaying in templates
                 parts_and_score = zip(qs_parts, score_list)

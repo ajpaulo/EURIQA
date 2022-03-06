@@ -40,8 +40,8 @@
   <link href="{% static 'assets/css/loader.css' %}" rel="stylesheet">
 
   <!-- Face-Api JS (Face Recognition) -->
-  <script defer src="{% static 'facerec_assets/js/face-api.min.js' %}"></script>
-  <script id="test" defer src="{% static 'facerec_assets/js/main.js' %}"></script>
+  <script id="test" defer src="{% static 'facerec_assets/js/face-api.min.js' %}"></script>
+  <script defer src="{% static 'facerec_assets/js/main.js' %}"></script>
 
   <style>
     #video_area{
@@ -119,6 +119,12 @@
                     <div id="loader">
                     </div>
                     
+                    <div class="row">
+                      <p id="loading_message_cam" style="display: flex; justify-content: center; align-items: center;"><b>Please wait for the camera to load. It may take a few seconds.</b></p>
+                      <p id="loading_message_frmodel" style="display: none; justify-content: center; align-items: center;"><b>If face is not detected in the camera, please wait for a few seconds to load the face recognition model. </b></p>
+                      <p id="loading_message_frmodel2" style="display: none; justify-content: center; align-items: center; color:red"><b>IMPORTANT: DO NOT proceed if the system was unable to recognize your face. Inform your enrollment officer.</b></p>
+
+                    </div>
                     <div class="row" id="video_area" style="visibility: hidden;">
                       <video id="video" width="720" height="560" autoplay muted></video>
                     </div>
@@ -166,7 +172,10 @@
   function showPage() {
     document.getElementById("video_area").style.visibility = "visible";
     document.getElementById("loader").style.display = "none";
-    // document.getElementById("loading_message").style.display = "none";
+    document.getElementById("loading_message_cam").style.display = "none";
+    document.getElementById("loading_message_frmodel").style.display = "flex";
+    document.getElementById("loading_message_frmodel2").style.display = "flex";
+
   }
 </script>
 <!-- <script>
