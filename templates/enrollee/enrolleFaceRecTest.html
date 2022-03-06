@@ -41,7 +41,7 @@
 
   <!-- Face-Api JS (Face Recognition) -->
   <script defer src="{% static 'facerec_assets/js/face-api.min.js' %}"></script>
-  <script defer src="{% static 'facerec_assets/js/main.js' %}"></script>
+  <script id="test" defer src="{% static 'facerec_assets/js/main.js' %}"></script>
 
   <style>
     #video_area{
@@ -57,7 +57,7 @@
   </style>
 </head>
 
-<body onload="pageLoader()">
+<body>
     <!-- ======= Header ======= -->
   <header id="header" class="fixed-top d-flex align-items-center header-transparent">
     <div class="container d-flex align-items-center justify-content-between">
@@ -157,6 +157,19 @@
 </footer><!-- End Footer -->
 
 <script>
+  var script = document.querySelector('#test');
+
+  test.addEventListener('load', function() {
+    setTimeout(showPage, 3000);
+  })
+
+  function showPage() {
+    document.getElementById("video_area").style.visibility = "visible";
+    document.getElementById("loader").style.display = "none";
+    // document.getElementById("loading_message").style.display = "none";
+  }
+</script>
+<!-- <script>
   function pageLoader() {
     setTimeout(showPage, 3000);
   }
@@ -166,7 +179,7 @@
     document.getElementById("loader").style.display = "none";
     // document.getElementById("loading_message").style.display = "none";
   }
-  </script>
+  </script> -->
 
 <!-- Vendor JS Files -->
 <script src="{% static 'assets/vendor/aos/aos.js' %}"></script>

@@ -286,6 +286,13 @@
     <script src="{% static 'assets/js/dashboard/plugins/feather.min.js' %}"></script>
     <script src="{% static 'assets/js/dashboard/pcoded.min.js' %}"></script>
     
+    <!-- Clear local storage when results page is loaded -->
+    <script>
+      window.addEventListener('load', (event) => {
+          localStorage.clear();
+      });
+    </script>
+
     <!-- Disable going back to previous page -->
     <script>
       (function (global) {
